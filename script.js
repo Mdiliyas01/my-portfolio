@@ -80,30 +80,53 @@ document.querySelectorAll('.project-card, .skill-card, .stat-card, .tool-item').
     observer.observe(el);
 });
 
-// Contact Form Handling
+// Contact Form Handling (Web3Forms Integration)
 const contactForm = document.getElementById('contactForm');
 
 if (contactForm) {
-    contactForm.addEventListener('submit', function(e) {
+    const submitBtn = contactForm.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
+
+    contactForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // Get form values
-        const formData = {
-            name: document.getElementById('name').value,
-            email: document.getElementById('email').value,
-            subject: document.getElementById('subject').value,
-            message: document.getElementById('message').value
-        };
+        // Show Loading State
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <span>Sending...</span>
+            <svg class="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" stroke-opacity="0.2"></circle>
+                <path d="M4 12a8 8 0 0 1 8-8"></path>
+            </svg>
+        `;
+
+        const formData = new FormData(contactForm);
         
-        // Here you would typically send the form data to a server
-        // For now, we'll just show a success message
-        console.log('Form submitted:', formData);
-        
-        // Show success message
-        showNotification('Message sent successfully! I\'ll get back to you soon.', 'success');
-        
-        // Reset form
-        contactForm.reset();
+        try {
+            const response = await fetch("https://api.web3forms.com/submit", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Success
+                showNotification('Message sent successfully! I\'ll get back to you soon.', 'success');
+                contactForm.reset();
+            } else {
+                // API Error
+                showNotification(`Error: ${data.message || 'Something went wrong.'}`, 'error');
+            }
+        } catch (error) {
+            // Network Error
+            showNotification('Unable to send message. Please check your connection.', 'error');
+            console.error('Submission error:', error);
+        } finally {
+            // Restore Button State
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
     });
 }
 
@@ -176,6 +199,17 @@ style.textContent = `
     
     .hamburger.active span:nth-child(3) {
         transform: rotate(-45deg) translate(7px, -6px);
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .animate-spin {
+        animation: spin 0.8s linear infinite;
+        display: inline-block;
+        vertical-align: middle;
     }
 `;
 document.head.appendChild(style);
