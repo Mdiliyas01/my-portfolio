@@ -1617,3 +1617,36 @@ body {
     border-radius: var(--radius-full);
     font-weight: 700;
 }
+/* ===================================
+   CONTACT FORM FEEDBACK
+   =================================== */
+.loading-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.6s linear infinite;
+    margin-left: 0.5rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Notification Styles Enhancements */
+.notification {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    align-items: center;
+    border-left: 4px solid rgba(0, 0, 0, 0.1);
+}
+
+.notification-success {
+    background: #10b981 !important;
+}
+
+.notification-error {
+    background: #ef4444 !important;
+}

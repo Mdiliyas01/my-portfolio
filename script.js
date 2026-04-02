@@ -80,30 +80,47 @@ document.querySelectorAll('.project-card, .skill-card, .stat-card, .tool-item').
     observer.observe(el);
 });
 
-// Contact Form Handling
+// Contact Form Handling (Web3Forms Integration)
 const contactForm = document.getElementById('contactForm');
 
 if (contactForm) {
-    contactForm.addEventListener('submit', function(e) {
+    const submitBtn = contactForm.querySelector('button[type="submit"]');
+
+    contactForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // Get form values
-        const formData = {
-            name: document.getElementById('name').value,
-            email: document.getElementById('email').value,
-            subject: document.getElementById('subject').value,
-            message: document.getElementById('message').value
-        };
+        // Disable button and show loading state
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.innerHTML = 'Sending Message... <span class="loading-spinner"></span>';
+        submitBtn.disabled = true;
+
+        const formData = new FormData(contactForm);
         
-        // Here you would typically send the form data to a server
-        // For now, we'll just show a success message
-        console.log('Form submitted:', formData);
-        
-        // Show success message
-        showNotification('Message sent successfully! I\'ll get back to you soon.', 'success');
-        
-        // Reset form
-        contactForm.reset();
+        try {
+            const response = await fetch("https://api.web3forms.com/submit", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.status === 200) {
+                // Success
+                showNotification('Success! Your message has been sent. I\'ll get back to you soon.', 'success');
+                contactForm.reset();
+            } else {
+                // API Error
+                showNotification(`Error: ${result.message || 'Submission failed'}`, 'error');
+            }
+        } catch (error) {
+            // Network Error
+            showNotification('Something went wrong. Please check your connection and try again.', 'error');
+            console.error('Submission error:', error);
+        } finally {
+            // Re-enable button
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+        }
     });
 }
 
